@@ -4,8 +4,9 @@ import {
   createBlog,
   allBlogs,
   searchBlogs,
+  getBlogBySlug,
 } from "../controllers/blog.controller.js";
-import { verifyToken, isAdmin } from "../middleware/adminMiddleware.js";
+import { adminMiddleware } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -20,9 +21,10 @@ const storage = multer.diskStorage({
 // Upload setup with multer
 const upload = multer({ storage });
 
-// Routes
-router.post("/add", verifyToken, isAdmin, upload.single("image"), createBlog);
-router.get("/list", verifyToken, allBlogs); // Ensure only logged-in users can access
-router.get("/search", verifyToken, searchBlogs); // Ensure only logged-in users can search
+router.post("/add", adminMiddleware, upload.single("image"), createBlog);
+router.post("/search", searchBlogs);
+
+router.get("/", allBlogs);
+router.get("/blog/:slug", getBlogBySlug);
 
 export default router;

@@ -27,7 +27,7 @@ export const createBlog = async (req, res) => {
     }
 
     // Handle optional image file
-    const image_file = req.file ? req.file.path : null;
+    const image_file = req.file ? req.file.filename : null;
 
     // Generate a slug if not provided
     let blogSlug = slug || generateSlug(title);
@@ -67,9 +67,8 @@ export const allBlogs = async (req, res) => {
     // Fetch all blogs sorted by creation date (most recent first)
     const blogs = await BlogModel.find({}).sort({ createdAt: -1 });
 
-    res.json({
-      success: true,
-      data: blogs,
+    res.render("index", {
+      blogs,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -77,33 +76,80 @@ export const allBlogs = async (req, res) => {
   }
 };
 
+export const getBlogBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const blog = await BlogModel.findOne({ slug }).populate("category");
+
+    // If no blog is found, respond with a 404 error
+    if (!blog) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
+    }
+
+    // console.log(blog.image);
+    res.render("blog", { blog });
+  } catch (error) {
+    // Handle server errors
+    console.error("Error fetching blog by slug:", error);
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
+
 export const searchBlogs = async (req, res) => {
   try {
-    const { title } = req.query; // Extract the search keyword from query parameters
+    let searchTerm = req.body.searchTerm;
+    const searchNospecialChar = searchTerm.replace(/[^a-zA-Z0-9 ]/g, "");
 
     // Validate the search input
-    if (!title || title.trim() === "") {
-      return res
-        .status(400)
-        .json({ message: "Search query (title) is required" });
+    if (searchTerm === "") {
+      return res.status(400).json({ message: "Search query is required" });
     }
 
     // Use a case-insensitive, partial match search
     const blogs = await BlogModel.find({
-      title: { $regex: title, $options: "i" },
+      $or: [
+        { title: { $regex: searchNospecialChar, $options: "i" } },
+        { body: { $regex: searchNospecialChar, $options: "i" } },
+      ],
     }).populate("category");
 
     // Check if any blogs are found
     if (blogs.length === 0) {
       return res
         .status(404)
-        .json({ message: "No blogs found for the given title" });
+        .render('404')
     }
-
-    // Respond with the matching blogs
-    res.status(200).json({ success: true, blogs });
+    // console.log(blogs);
+    res.render("search", { blogs });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
     console.error("Error in searchBlogs controller:", error);
   }
 };
+
+const adminLayout = '../views/layouts/admin.ejs'
+export const adminPanel = async (req, res) => {
+  try {
+    const locals = {
+      title: "blog",
+      description: "simple blog created with nodejs and mongodb",
+    };
+
+    res.render("admin/adminIndex", { locals, layout: adminLayout });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const adminDashboard = async (req, res) => {
+  try {
+    const blogs = await BlogModel.find({}).sort({ createdAt: -1 });
+    const categories = await CategoryModel.find({}).sort({ name: 1 });
+
+    res.render("admin/dashboard", { blogs, categories,layout: adminLayout });
+  } catch (error) {
+    console.log(error);
+  }
+}

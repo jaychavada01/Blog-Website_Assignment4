@@ -1,0 +1,40 @@
+<div class="container my-5">
+  <div class="row">
+    <div class="col-lg-10 mx-auto">
+      <article class="blog-post shadow rounded">
+        <!-- Larger image section -->
+        <div class="blog-image-container">
+          <img
+            src="<%= blog.image && blog.image.startsWith('http') ? blog.image : (blog.image ? `/${blog.image}` : 'https://www.hostinger.com/tutorials/wp-content/uploads/sites/2/2021/09/how-to-write-a-blog-post.png') %>"
+            alt="<%= blog.title %>"
+            class="img-fluid w-100 rounded-top"
+          />
+        </div>
+        <!-- Content section -->
+        <div class="blog-content-wrapper p-4">
+          <!-- Title and category -->
+          <div class="blog-header mb-4">
+            <h2 class="blog-title mb-3"><%= blog.title %></h2>
+            <span class="category-badge bg-light text-dark px-3 py-1 rounded">
+              Category:
+              <i class="fas fa-folder me-2"></i><%= blog.category.name %>
+            </span>
+          </div>
+
+          <!-- Description -->
+          <div class="blog-content mb-4">
+            <p class="lead">Description: <%= blog.description %></p>
+          </div>
+
+          <!-- Date -->
+          <div class="blog-footer text-muted">
+            <i class="far fa-calendar-alt me-2"></i>
+            Created At:
+            <%= new Date(blog.createdAt).toLocaleDateString("en-US", { year:
+            "numeric", month: "long", day: "numeric", }) %>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</div>

@@ -1,91 +1,80 @@
-import adminModel from "../models/admin.model.js";
-import bcrypt from "bcryptjs";
+import Admin from "../models/admin.model.js";
 import { generateToken } from "../utils/GenerateToken.js";
 
+const adminLayout = '../views/layouts/admin.ejs'
+
 export const signupAdmin = async (req, res) => {
-  const { username, email, password } = req.body;
-
   try {
-    const isAdmin = await adminModel.findOne({ email });
-    if (isAdmin) {
-      return res.json({ success: false, message: "Admin already exists!" });
-    }
+    const { email, password } = req.body;
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const newAdmin = new adminModel({
-      username,
-      email,
-      password: hashedPassword,
-    });
-
-    const admin = await newAdmin.save();
-    const token = generateToken({ id: admin._id });
-
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      maxAge: 2 * 60 * 60 * 1000, // 2 hours
-      sameSite: "strict",
-    });
-
-    res.status(200).json({
-      message: "Admin sign-up successful.",
-    });
-  } catch (error) {
-    console.error("Admin sign-up error:", error.message);
-    res.status(500).json({ error: "Server error. Please try again later." });
-  }
-};
-
-export const loginAdmin = async (req, res) => {
-  const { email, password } = req.body;
-  const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-
-  try {
     if (!email || !password) {
       return res
         .status(400)
         .json({ message: "Email and password are required." });
     }
 
-    const admin = await adminModel.findOne({ email });
-    if (!admin || email !== ADMIN_EMAIL) {
-      return res.status(400).json({ message: "Invalid admin credentials." });
+    const existingAdmin = await Admin.findOne({ email });
+    if (existingAdmin) {
+      return res.status(409).json({ message: "Admin already exists." });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, ADMIN_PASSWORD);
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: "Invalid admin credentials." });
-    }
+    const newAdmin = await Admin.create({ email, password });
 
-    const token = generateToken({ email, role: "admin" });
+    const token = generateToken({ id: newAdmin._id, role: "admin" });
 
     res.cookie("jwt", token, {
       httpOnly: true,
-      maxAge: 2 * 60 * 60 * 1000, // 2 hours
+      maxAge: 15 * 24 * 60 * 60 * 1000,
       sameSite: "strict",
     });
 
-    res.status(200).json({
-      message: "Admin login successful.",
-      admin: {
-        email: ADMIN_EMAIL,
-        role: "admin",
-      },
+    await newAdmin.save();
+    res.status(201).json({
+      message: "Admin signup successful.",
+      admin: { email: newAdmin.email, role: newAdmin.role },
     });
   } catch (error) {
-    console.error("Admin login error:", error.message);
-    res.status(500).json({ error: "Server error. Please try again later." });
+    console.error("Admin signup error:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
   }
 };
 
-export const logoutAdmin = async (req, res) => {
+export const loginAdmin = async (req, res) => {
   try {
-    res.status(200).json({ message: "Admin logged out successfully!" });
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required." });
+    }
+
+    const admin = await Admin.findOne({ email });
+    if (!admin || !(await admin.correctPassword(password))) {
+      return res.status(401).json({ message: "Invalid admin credentials." });
+    }
+
+    const token = generateToken({ id: admin._id, role: admin.role });
+
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
+      sameSite: "strict",
+    });
+
+    res.redirect('/auth/admindashboard')
+
+    // res.status(200).json({
+    //   message: "Admin login successful.",
+    //   admin: { email: admin.email, role: admin.role },
+    // });
   } catch (error) {
-    console.error("Admin logout error:", error.message);
-    res.status(500).json({ error: "Server error. Please try again later." });
+    console.error("Admin login error:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
   }
+};
+
+export const logoutAdmin = (req, res) => {
+  res.clearCookie("jwt");
+  res.status(200).json({ message: "Admin logout successful." });
 };

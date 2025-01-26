@@ -1,0 +1,36 @@
+<div class="author">
+  <h1 class="author__heading">Hi, I am Jay.</h1>
+  <p class="author__body">Web developer and content creator.</p>
+</div>
+
+<img
+  src="/img/hero-image.webp"
+  alt="person looking out through window"
+  class="hero-image"
+  width="981"
+  height="528"
+/>
+
+<section class="articles">
+  <h2 class="articles__heading">Latest Posts</h2>
+
+  <div class="cards-container">
+    <% blogs.forEach(blog => { %>
+    <div class="card">
+      <img
+        src="/<%= blog.image %>"
+        alt="<%= blog.title %>"
+        class="card-image"
+      />
+      <div class="card-content">
+        <h3 class="card-title"><%= blog.title %></h3>
+        <p class="card-description"><%= blog.description %></p>
+        <p class="card-date">
+          <%= new Date(blog.publishDate).toDateString() %>
+        </p>
+        <a href="/blog/<%= blog.slug %>" class="read-more-btn">Read More</a>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+</section>
