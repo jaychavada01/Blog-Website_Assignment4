@@ -2,19 +2,6 @@
 
 - A responsive blog website created with Bootstrap, ejs, Node, Express, MongoDb
 
-### UI Design with Admin Panel:
-![User Panel](public\img\User.png)
-
-![Admin Panel](public\img\Admin.png)
-
-![AllBlog](public\img\Allblog.png)
-
-![AddBlog](public\img\Addblog.png)
-
-![AllCat](public\img\Allcate.png)
-
-![AddCat](public\img\Addcate.png)
-
 ## Features
 
 - Dynamic blog post creation
