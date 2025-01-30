@@ -12,9 +12,9 @@
 - Blog post categories
 - Search functionality
 
-## Installation
+## .env.sample
 
-```.env
+```
 PORT
 MONGODB_URL
 JWT_SECRET
