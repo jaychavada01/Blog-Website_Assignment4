@@ -1,10 +1,12 @@
 # Blog Website
 
-A responsive blog website created with Bootstrap, ejs, Node, Express, MongoDb
+- A responsive blog website created with Bootstrap, ejs, Node, Express, MongoDb
+
+### UI Design With Admin Panel:
+
 
 ## Features
 
-- Responsive design for all devices
 - Dynamic blog post creation
 - User-friendly interface
 - Blog post categories
@@ -12,17 +14,15 @@ A responsive blog website created with Bootstrap, ejs, Node, Express, MongoDb
 
 ## Installation
 
-```bash
-# .env
+```.env
 PORT
 MONGODB_URL
 JWT_SECRET
-ADMIN_EMAIL
-ADMIN_PASSWORD
 ```
 
-## Usage
+## Admin Functionality  
 
 - Browse blog posts
-- Create new posts
+- Create new posts/category
+- Edit and Delete Blog and Category
 - Search for specific content

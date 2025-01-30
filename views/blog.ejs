@@ -1,40 +1,107 @@
-<div class="container my-5">
-  <div class="row">
-    <div class="col-lg-10 mx-auto">
-      <article class="blog-post shadow rounded">
-        <!-- Larger image section -->
-        <div class="blog-image-container">
-          <img
-            src="<%= blog.image && blog.image.startsWith('http') ? blog.image : (blog.image ? `/${blog.image}` : 'https://www.hostinger.com/tutorials/wp-content/uploads/sites/2/2021/09/how-to-write-a-blog-post.png') %>"
-            alt="<%= blog.title %>"
-            class="img-fluid w-100 rounded-top"
-          />
-        </div>
-        <!-- Content section -->
-        <div class="blog-content-wrapper p-4">
-          <!-- Title and category -->
-          <div class="blog-header mb-4">
-            <h2 class="blog-title mb-3"><%= blog.title %></h2>
-            <span class="category-badge bg-light text-dark px-3 py-1 rounded">
-              Category:
-              <i class="fas fa-folder me-2"></i><%= blog.category.name %>
-            </span>
-          </div>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog Post</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Blog Post Styling */
+      .blog-post {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
 
-          <!-- Description -->
-          <div class="blog-content mb-4">
-            <p class="lead">Description: <%= blog.description %></p>
-          </div>
+      .blog-post:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      }
 
-          <!-- Date -->
-          <div class="blog-footer text-muted">
-            <i class="far fa-calendar-alt me-2"></i>
-            Created At:
-            <%= new Date(blog.createdAt).toLocaleDateString("en-US", { year:
-            "numeric", month: "long", day: "numeric", }) %>
-          </div>
+      .blog-image-container {
+        max-height: 400px;
+        overflow: hidden;
+      }
+
+      .blog-image-container img {
+        object-fit: cover;
+        height: 100%;
+        width: 100%;
+      }
+
+      .blog-content-wrapper {
+        background-color: #f8f9fa;
+      }
+
+      .blog-title {
+        font-size: 2rem;
+        font-weight: 700;
+      }
+
+      .category-badge {
+        background-color: #0d6efd;
+        font-size: 0.85rem;
+      }
+
+      .blog-footer {
+        font-size: 0.9rem;
+        color: #6c757d;
+      }
+
+      .lead {
+        color: #495057;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container my-5">
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+          <article class="blog-post shadow-lg rounded border border-light">
+            <!-- Larger image section -->
+            <div class="blog-image-container overflow-hidden rounded-top">
+              <img
+                src="/uploads/<%= blog.image %>"
+                alt="<%= blog.title %>"
+                class="img-fluid w-100"
+              />
+            </div>
+            <!-- Content section -->
+            <div class="blog-content-wrapper bg-light p-4 rounded-bottom">
+              <!-- Title and category -->
+              <div class="blog-header mb-4">
+                <h2 class="blog-title mb-3 text-primary"><%= blog.title %></h2>
+                <span class="category-badge text-white px-3 py-1 rounded">
+                  <i class="fas fa-folder me-2"></i>Category: <%=
+                  blog.category.name %>
+                </span>
+              </div>
+
+              <!-- Description -->
+              <div class="blog-content mb-4">
+                <p class="lead text-muted">
+                  Description: <%= blog.description %>
+                </p>
+              </div>
+
+              <!-- Date -->
+              <div class="blog-footer text-muted">
+                <i class="far fa-calendar-alt me-2"></i>
+                Created At: <%= new Date(blog.createdAt).toDateString() %>
+              </div>
+            </div>
+          </article>
         </div>
-      </article>
+      </div>
     </div>
-  </div>
-</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script
+      src="https://kit.fontawesome.com/a076d05399.js"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

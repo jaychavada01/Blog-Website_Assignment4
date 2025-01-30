@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Blogs</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+</head>
+<body>
+  <div class="container-fluid d-flex">
+    <!-- Main Content Area -->
+    <div class="container mt-5" style="flex-grow: 1;">
+      <h1 class="mt-5">All Blogs</h1>
+      <table class="table table-bordered mt-4">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% blogs.forEach(blog => { %>
+          <tr>
+            <td><%= blog.title %></td>
+            <td><%= blog.description %></td>
+            <td><%= blog.category ? blog.category.name : "No Category" %></td>
+            <td>
+              <a href="#" class="edit-blog" data-id="<%= blog._id %>">Edit</a> |
+              <a
+                href="/admin/deleteBlogs/<%= blog._id %>"
+                onclick="return confirm('Are you sure?')"
+              >Delete</a>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,14 +1,79 @@
-<div class="searchBar">
-  <div class="container">
-    <form action="/search" method="POST" class="search__form" role="search">
+<style>
+  .search-bar {
+    margin-bottom: 20px;
+  }
+  .card {
+    transition: transform 0.2s;
+  }
+  .card:hover {
+    transform: scale(1.05);
+  }
+</style>
+
+<div class="container my-5">
+  <div class="search-bar">
+    <form id="searchForm" class="d-flex">
       <input
-        type="search"
-        aria-label="Seach"
+        type="text"
         id="searchInput"
-        name="searchTerm"
-        placeholder="Seach Blog by title..."
+        name="query"
+        class="form-control me-2"
+        placeholder="Search blogs by title or description..."
       />
+      <button type="submit" class="btn btn-primary">Search</button>
     </form>
-    <div id="searchClose" class="btn-primary">Close</div>
   </div>
 </div>
+
+<script>
+  document
+    .getElementById("searchForm")
+    .addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const query = document.getElementById("searchInput").value.trim();
+      const contentArea = document.getElementById("contentArea");
+      contentArea.innerHTML = ""; // Clear previous content
+
+      if (!query) {
+        contentArea.innerHTML = `<p class="text-center">Please enter a search term.</p>`;
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/search?query=${encodeURIComponent(query)}`
+        );
+        const blogs = await response.json();
+
+        if (blogs.length === 0) {
+          contentArea.innerHTML = `<p class="text-center">No blogs found.</p>`;
+          return;
+        }
+
+        blogs.forEach((blog) => {
+          const cardHtml = `
+        <div class="col">
+          <div class="card shadow-sm h-100" style="width: 300px; height: 300px">
+            <img src="/uploads/${blog.image}" class="card-img-top" alt="${
+            blog.title
+          }" />
+            <div class="card-body">
+              <h5 class="card-title">${blog.title}</h5>
+              <p class="card-text">${blog.description.substring(0, 100)}...</p>
+              <a href="/allblog/${
+                blog.slug
+              }" class="btn btn-primary btn-sm">View Full Blog</a>
+            </div>
+          </div>
+        </div>
+      `;
+
+          contentArea.insertAdjacentHTML("beforeend", cardHtml);
+        });
+      } catch (err) {
+        console.error(err);
+        contentArea.innerHTML = `<p class="text-center text-danger">An error occurred while fetching blogs.</p>`;
+      }
+    });
+</script>

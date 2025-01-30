@@ -7,6 +7,8 @@ import dotenv from "dotenv";
 import expressEjsLayouts from "express-ejs-layouts";
 import path from "path";
 import { fileURLToPath } from "url";
+import BlogModel from "./models/blog.model.js";
+import Category from "./models/category.model.js";
 
 import Database from "./db/Database.js";
 
@@ -58,6 +60,28 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).render("error", { error: err });
+});
+
+// Route to fetch all blogs
+app.get('/allblogs', async (req, res) => {
+  try {
+    const blogs = await BlogModel.find().sort({ createdAt: -1 }).populate('category');
+    res.json(blogs);
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    res.status(500).json({ message: 'Error fetching blogs.' });
+  }
+});
+
+// Route to fetch all category
+app.get("/allcategories", async (req, res) => {
+  try {
+    const categories = await Category.find().sort({ createdAt: -1 }); // Assuming you have a Category model
+    res.json(categories); // Return categories as JSON
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).json({ message: "Error fetching categories." });
+  }
 });
 
 app.listen(PORT, () => {

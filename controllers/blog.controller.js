@@ -1,5 +1,6 @@
 import BlogModel from "../models/blog.model.js";
 import CategoryModel from "../models/category.model.js";
+import mongoose from "mongoose";
 
 // Utility function to generate a slug
 const generateSlug = (title) => {
@@ -65,10 +66,14 @@ export const createBlog = async (req, res) => {
 export const allBlogs = async (req, res) => {
   try {
     // Fetch all blogs sorted by creation date (most recent first)
-    const blogs = await BlogModel.find({}).sort({ createdAt: -1 });
-
+    const blogs = await BlogModel.find({})
+      .sort({ createdAt: -1 })
+      .populate("category", "name") // Fetch category name instead of ID
+      .exec();
+    const categories = await CategoryModel.find();
     res.render("index", {
       blogs,
+      categories,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -78,78 +83,70 @@ export const allBlogs = async (req, res) => {
 
 export const getBlogBySlug = async (req, res) => {
   try {
-    const { slug } = req.params;
-    const blog = await BlogModel.findOne({ slug }).populate("category");
-
-    // If no blog is found, respond with a 404 error
-    if (!blog) {
+    const blog = await BlogModel.findOne({ slug: req.params.slug });
+    if (!blog)
       return res
         .status(404)
         .json({ success: false, message: "Blog not found" });
-    }
-
-    // console.log(blog.image);
-    res.render("blog", { blog });
+    res.json(blog);
+    // res.render("blog", { blog });
   } catch (error) {
-    // Handle server errors
-    console.error("Error fetching blog by slug:", error);
-    res.status(500).json({ success: false, message: "Server error", error });
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateBlog = async (req, res) => {
+  try {
+    const updatedBlog = await BlogModel.findOneAndUpdate(
+      { slug: req.params.slug },
+      req.body,
+      { new: true }
+    );
+    res.json({ success: true, updatedBlog });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const deleteBlog = async (req, res) => {
+  try {
+    const deletedBlog = await BlogModel.findOneAndDelete({
+      slug: req.params.slug,
+    });
+    res.json({ success: !!deletedBlog });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
 export const searchBlogs = async (req, res) => {
   try {
-    let searchTerm = req.body.searchTerm;
-    const searchNospecialChar = searchTerm.replace(/[^a-zA-Z0-9 ]/g, "");
+    const query = req.query.query?.trim();
 
-    // Validate the search input
-    if (searchTerm === "") {
-      return res.status(400).json({ message: "Search query is required" });
+    if (!query) {
+      return res.status(400).json({ message: "Search query is empty" });
     }
 
-    // Use a case-insensitive, partial match search
-    const blogs = await BlogModel.find({
-      $or: [
-        { title: { $regex: searchNospecialChar, $options: "i" } },
-        { body: { $regex: searchNospecialChar, $options: "i" } },
-      ],
-    }).populate("category");
+    // Fetch blogs matching the query by title (case-insensitive)
+    const blogs = await BlogModel.find({ title: { $regex: query, $options: "i" } });
 
-    // Check if any blogs are found
-    if (blogs.length === 0) {
-      return res
-        .status(404)
-        .render('404')
-    }
-    // console.log(blogs);
-    res.render("search", { blogs });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-    console.error("Error in searchBlogs controller:", error);
+    res.json(blogs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-const adminLayout = '../views/layouts/admin.ejs'
-export const adminPanel = async (req, res) => {
-  try {
-    const locals = {
-      title: "blog",
-      description: "simple blog created with nodejs and mongodb",
-    };
-
-    res.render("admin/adminIndex", { locals, layout: adminLayout });
-  } catch (error) {
-    console.log(error);
-  }
-}
-
+const adminLayout = "../views/layouts/admin.ejs";
 export const adminDashboard = async (req, res) => {
   try {
-    const blogs = await BlogModel.find({}).sort({ createdAt: -1 });
+    const blogs = await BlogModel.find({})
+      .sort({ createdAt: -1 })
+      .populate("category");
     const categories = await CategoryModel.find({}).sort({ name: 1 });
 
-    res.render("admin/dashboard", { blogs, categories,layout: adminLayout });
+    res.render("admin/dashboard", { blogs, categories, layout: adminLayout });
   } catch (error) {
     console.log(error);
   }
-}
+};
